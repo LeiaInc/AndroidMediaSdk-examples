@@ -75,18 +75,6 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
 
     }
 
-    private void renderDepthDataToTarget(Bitmap depthBitmap, TextureView renderTarget) {
-        if (renderTarget.isAvailable()) {
-            Canvas canvas = renderTarget.lockCanvas();
-            canvas.drawBitmap(
-                    depthBitmap,
-                    null,
-                    new RectF(0, 0, canvas.getWidth(), canvas.getHeight()),
-                    null);
-            renderTarget.unlockCanvasAndPost(canvas);
-        }
-    }
-
     private void configureGo4v(SurfaceTexture surfaceTexture) {
         if (mStereoVideoSurfaceRenderer == null) {
             mStereoVideoSurfaceRenderer =

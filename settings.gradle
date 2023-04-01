@@ -1,2 +1,3 @@
 include ':test_stereo'
+include ':test_mono'
 rootProject.name = "AndroidMediaSdkExamples"
