@@ -8,7 +8,6 @@ import android.graphics.SurfaceTexture;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Surface;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -30,6 +29,7 @@ import com.leia.core.LogLevel;
 import com.leia.sdk.LeiaSDK;
 import com.leia.sdk.views.InputViewsAsset;
 import com.leia.sdk.views.InterlacedSurfaceView;
+import com.leia.sdk.views.ScaleType;
 import com.leiainc.androidsdk.video.RenderConfig;
 import com.leiainc.androidsdk.video.mono.MonoVideoSurfaceRenderer;
 
@@ -52,25 +52,23 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
             e.printStackTrace();
             finish();
         }
+        //Bind view
         ButterKnife.bind(this);
-        View decorView = getWindow().getDecorView();
-        // Hide the nav bar at top and bottom.
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
-
+        // Init Exoplayer
         mPlayer = new SimpleExoPlayer.Builder(this).build();
-
+        // Setup 3d view to render video
         InputViewsAsset newViewsAsset = new InputViewsAsset();
+        RenderConfig cfg = RenderConfig.getDefaultRenderConfig();
         newViewsAsset.CreateEmptySurfaceForVideo(
-                2560,
-                1600,
+                cfg.screenWidth,
+                cfg.screenHeight,
                 surfaceTexture -> {
-                    surfaceTexture.setDefaultBufferSize(2560, 1600);
+                    surfaceTexture.setDefaultBufferSize(cfg.screenWidth, cfg.screenHeight);
                     configureGo4v(surfaceTexture);
                 });
         mInterlacedView.setViewAsset(newViewsAsset);
-
-        // When the SeekBar is adjusted, change the gain and update the TextView.
+        mInterlacedView.setScaleType(ScaleType.FIT_CENTER);
+        // Setup 3d effect slider
         TextView gainTextView = findViewById(R.id.gain_textview);
         SeekBar gainSeekBar = findViewById(R.id.gain_seekbar);
         gainSeekBar.setOnSeekBarChangeListener(
@@ -118,22 +116,10 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
                             int height,
                             int unappliedRotationDegrees,
                             float pixelWidthHeightRatio) {
-                        RenderConfig cfg = RenderConfig.getDefaultRenderConfig();
-                        // buffer size matches LumePad resolution
-                        surfaceTexture.setDefaultBufferSize(cfg.screenWidth, cfg.screenHeight);
-
-                        // Buffer size matches Lumepad resolution without losing aspect ratio.
-                        float newWidth =
-                                (float)
-                                        Math.sqrt(
-                                                (width / height)
-                                                        * cfg.screenWidth
-                                                        * cfg.screenHeight);
-                        float newHeight = (cfg.screenWidth * cfg.screenHeight / newWidth);
-                        // Supersample the input texture to increase sharpness
-                        newWidth *= 1.5;
-                        newHeight *= 1.5;
-                        DepthViewSurface.setDefaultBufferSize((int) newWidth, (int) newHeight);
+                        // We transform mono to stereo
+                        int stereo_width = width * 2;
+                        surfaceTexture.setDefaultBufferSize(stereo_width, height);
+                        DepthViewSurface.setDefaultBufferSize((int) stereo_width, (int) height);
                     }
                 });
 

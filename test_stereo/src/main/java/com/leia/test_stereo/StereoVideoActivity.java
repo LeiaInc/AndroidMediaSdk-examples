@@ -3,14 +3,10 @@ package com.leia.test_stereo;
 import static com.leiainc.androidsdk.video.stereo.TextureShape.LANDSCAPE;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Surface;
-import android.view.TextureView;
 import android.view.View;
 import android.widget.ImageButton;
 import androidx.annotation.NonNull;
@@ -25,20 +21,19 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.video.VideoListener;
 import com.leia.core.LogLevel;
 import com.leia.sdk.views.InputViewsAsset;
 import com.leia.sdk.views.InterlacedSurfaceView;
+import com.leia.sdk.views.ScaleType;
 import com.leiainc.androidsdk.video.RenderConfig;
 import com.leiainc.androidsdk.video.stereo.StereoVideoSurfaceRenderer;
 import com.leia.sdk.LeiaSDK;
 
 public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.Delegate{
-
-    // Interlaced view for 3d video
     @BindView(R.id.interlacedView)
     InterlacedSurfaceView mInterlacedView;
     private SimpleExoPlayer mPlayer;
-    //3d renderer
     private StereoVideoSurfaceRenderer mStereoVideoSurfaceRenderer;
 
     @Override
@@ -52,25 +47,25 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
             e.printStackTrace();
             finish();
         }
+        //Bind view
         ButterKnife.bind(this);
-        View decorView = getWindow().getDecorView();
-        // Hide the nav bar at top and bottom.
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
 
         // Init Exoplayer
         mPlayer = new SimpleExoPlayer.Builder(this).build();
 
         //Init 3d view
         InputViewsAsset newViewsAsset = new InputViewsAsset();
+        RenderConfig cfg = RenderConfig.getDefaultRenderConfig();
         newViewsAsset.CreateEmptySurfaceForVideo(
-                2560,
-                1600,
+                cfg.screenWidth,
+                cfg.screenHeight,
                 surfaceTexture -> {
-                    surfaceTexture.setDefaultBufferSize(2560, 1600);
+                    surfaceTexture.setDefaultBufferSize(cfg.screenWidth, cfg.screenHeight);
                     configureGo4v(surfaceTexture);
                 });
         mInterlacedView.setViewAsset(newViewsAsset);
+        mInterlacedView.setScaleType(ScaleType.FIT_CENTER);
+        //Turn on 3d backlight
         LeiaSDK.getInstance().enableBacklight(true);
 
     }
@@ -83,18 +78,34 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
                             new Surface(surfaceTexture),
                             LANDSCAPE,
                             RenderConfig.getDefaultRenderConfig(),
-                            this::configureExoplayer,
+                            renderSurfaceTexture -> {
+                                configureExoplayer(surfaceTexture, renderSurfaceTexture);
+                            },
                             true);
             mStereoVideoSurfaceRenderer.setRgbFrameDelay(0);
         }
     }
 
-    private void configureExoplayer(SurfaceTexture surfaceTexture) {
+    private void configureExoplayer( SurfaceTexture DepthViewSurface, SurfaceTexture surfaceTexture) {
+
+        mPlayer.addVideoListener(
+                new VideoListener() {
+                    @Override
+                    public void onVideoSizeChanged(
+                            int width,
+                            int height,
+                            int unappliedRotationDegrees,
+                            float pixelWidthHeightRatio) {
+                        //This is half view video that needs to be stretched 2x to show properly
+                        surfaceTexture.setDefaultBufferSize(width*2, height);
+                        DepthViewSurface.setDefaultBufferSize((int) width*2, (int) height);
+                    }
+                });
 
         mPlayer.setVideoSurface(new Surface(surfaceTexture));
 
         String userAgent = Util.getUserAgent(this, "exoplayer2example");
-        Uri uri = Uri.parse("asset:///test_2x1.mp4");
+        Uri uri = Uri.parse("asset:///avatar_2x1.mp4");
         DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this, userAgent);
         MediaSource videoSource =
                 new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
