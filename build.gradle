@@ -1,0 +1,54 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    ext.kotlin_version = "1.7.20"
+    repositories {
+        google()
+        jcenter()
+        flatDir {
+            dirs 'libs'
+        }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5"
+    }
+}
+
+def loadPropertiesFile(String filename) {
+    def properties = new Properties()
+    def keystorePropertiesFile = rootProject.file(filename)
+    if (!keystorePropertiesFile.exists()) return null
+    properties.load(new FileInputStream(keystorePropertiesFile))
+    return properties
+}
+
+for (def prop : project.properties) {
+    if (prop.key.startsWith('android.injected')) {
+        println(prop)
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        gradlePluginPortal()
+        flatDir {
+            dirs 'libs'
+        }
+    }
+
+    // Project-wide variables
+    project.ext {
+        def versionProperties = loadPropertiesFile("version.properties")
+        versionName = versionProperties['versionName']
+    }
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
