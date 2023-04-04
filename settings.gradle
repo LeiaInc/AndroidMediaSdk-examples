@@ -1,5 +1,5 @@
 include ':test_stereo'
 include ':test_mono'
-include ':test_convergence'
+include ':test_stereo_with_convergence'
 include ':test_drm'
 rootProject.name = "AndroidMediaSdkExamples"
