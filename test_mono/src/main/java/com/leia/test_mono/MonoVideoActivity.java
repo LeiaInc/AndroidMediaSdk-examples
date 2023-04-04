@@ -50,18 +50,6 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
         initialize();
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        LeiaSDK instance = LeiaSDK.getInstance();
-        if (instance != null) {
-            instance.enableBacklight(hasFocus);
-        }
-        if (mPlayer != null && !hasFocus) {
-            mPlayer.setPlayWhenReady(false);
-        }
-        super.onWindowFocusChanged(hasFocus);
-    }
-
     private void initialize() {
         //Init LeiaSDK and start tracking
         try {
@@ -160,15 +148,30 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
                 playing ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play);
     }
 
+    private void setMode(boolean mode3D) {
+        LeiaSDK instance = LeiaSDK.getInstance();
+        if (instance != null) {
+            instance.enableBacklight(mode3D);
+            instance.startFaceTracking(mode3D);
+            mInterlacedView.setSingleViewMode(!mode3D);
+        }
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
+        setMode(false);
         mPlayer.setPlayWhenReady(false);
+
+        if (LeiaSDK.getInstance() != null) {
+            LeiaSDK.getInstance().onPause();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        setMode(true);
         if (mPlayer == null) {
             initialize();
         }
@@ -180,11 +183,19 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        setMode(hasFocus);
+        if (mPlayer != null && !hasFocus) {
+            mPlayer.setPlayWhenReady(false);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         LeiaSDK.shutdownSDK();
     }
-
 
     @Override
     protected void onStop() {

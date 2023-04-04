@@ -53,18 +53,6 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
         initialize();
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        LeiaSDK instance = LeiaSDK.getInstance();
-        if (instance != null) {
-            instance.enableBacklight(hasFocus);
-        }
-        if (mPlayer != null && !hasFocus) {
-            mPlayer.setPlayWhenReady(false);
-        }
-        super.onWindowFocusChanged(hasFocus);
-    }
-
     private void initialize() {
         if (mPlayer != null) {
             mPlayer.release();
@@ -140,15 +128,30 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
                 playing ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play);
     }
 
+    private void setMode(boolean mode3D) {
+        LeiaSDK instance = LeiaSDK.getInstance();
+        if (instance != null) {
+            instance.enableBacklight(mode3D);
+            instance.startFaceTracking(mode3D);
+            mInterlacedView.setSingleViewMode(!mode3D);
+        }
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
+        setMode(false);
         mPlayer.setPlayWhenReady(false);
+
+        if (LeiaSDK.getInstance() != null) {
+            LeiaSDK.getInstance().onPause();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        setMode(true);
         if (mPlayer == null) {
             initialize();
         }
@@ -157,6 +160,21 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
         if (LeiaSDK.getInstance() != null) {
             LeiaSDK.getInstance().onResume();
         }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        setMode(hasFocus);
+        if (mPlayer != null && !hasFocus) {
+            mPlayer.setPlayWhenReady(false);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LeiaSDK.shutdownSDK();
     }
 
     @Override
@@ -171,12 +189,6 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
             mStereoVideoSurfaceRenderer.release();
             mStereoVideoSurfaceRenderer = null;
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        LeiaSDK.shutdownSDK();
     }
 
     private void initTracking() throws Exception {
