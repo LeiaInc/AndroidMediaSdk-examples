@@ -101,10 +101,9 @@ public class StereoConvergenceVideoActivity extends Activity implements com.leia
                         this,
                         new Surface(surfaceTexture),
                         LANDSCAPE,
-                        RenderConfig.getDefaultRenderConfig(),
+                        null,
                         renderSurfaceTexture -> configureExoplayer(surfaceTexture, renderSurfaceTexture),
                         true);
-        mStereoVideoSurfaceRenderer.setRgbFrameDelay(0);
         mStereoVideoSurfaceRenderer.setGainConvergenceAnalysisCallback((convergence, unused) -> runOnUiThread(() -> {
             final float limit = 0.3f;
             if (mStereoVideoSurfaceRenderer != null) {

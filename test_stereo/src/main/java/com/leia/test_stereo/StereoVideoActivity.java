@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.Surface;
 import android.widget.ImageButton;
 import androidx.annotation.NonNull;
@@ -26,7 +25,6 @@ import com.leia.core.LogLevel;
 import com.leia.sdk.views.InputViewsAsset;
 import com.leia.sdk.views.InterlacedSurfaceView;
 import com.leia.sdk.views.ScaleType;
-import com.leia.test_stereo.R;
 import com.leiainc.androidsdk.video.RenderConfig;
 import com.leiainc.androidsdk.video.stereo.StereoVideoSurfaceRenderer;
 import com.leia.sdk.LeiaSDK;
@@ -101,10 +99,9 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
                         this,
                         new Surface(surfaceTexture),
                         LANDSCAPE,
-                        RenderConfig.getDefaultRenderConfig(),
+                        null,
                         renderSurfaceTexture -> configureExoplayer(surfaceTexture, renderSurfaceTexture),
                         true);
-        mStereoVideoSurfaceRenderer.setRgbFrameDelay(0);
     }
 
     private void configureExoplayer( SurfaceTexture DepthViewSurface, SurfaceTexture surfaceTexture) {
@@ -131,7 +128,6 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
         MediaSource videoSource =
                 new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
         LoopingMediaSource loopingSource = new LoopingMediaSource(videoSource);
-
         mPlayer.prepare(loopingSource);
     }
 
