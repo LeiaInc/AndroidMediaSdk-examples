@@ -77,12 +77,11 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
                             this,
                             new Surface(surfaceTexture),
                             LANDSCAPE,
-                            RenderConfig.getDefaultRenderConfig(),
+                            null,
                             renderSurfaceTexture -> {
                                 configureExoplayer(surfaceTexture, renderSurfaceTexture);
                             },
                             true);
-            mStereoVideoSurfaceRenderer.setRgbFrameDelay(0);
         }
     }
 

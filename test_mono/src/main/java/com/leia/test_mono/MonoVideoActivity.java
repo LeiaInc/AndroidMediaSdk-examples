@@ -98,11 +98,9 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
                     new MonoVideoSurfaceRenderer(
                             this,
                             new Surface(surfaceTexture),
-                            null,
                             monoSurfaceTexture -> {
                                 configureExoplayer(surfaceTexture, monoSurfaceTexture);
-                            },
-                            new RenderConfig(2, 1, 2f, 5, 2400, 1600));
+                            });
         }
     }
 
