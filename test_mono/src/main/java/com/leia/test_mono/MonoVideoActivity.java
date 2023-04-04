@@ -26,6 +26,8 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
 import com.leia.core.LogLevel;
+import com.leia.headtracking.HeadTrackingFrame;
+import com.leia.headtracking.HeadTrackingFrameListener;
 import com.leia.sdk.LeiaSDK;
 import com.leia.sdk.views.InputViewsAsset;
 import com.leia.sdk.views.InterlacedSurfaceView;
@@ -33,7 +35,7 @@ import com.leia.sdk.views.ScaleType;
 import com.leiainc.androidsdk.video.RenderConfig;
 import com.leiainc.androidsdk.video.mono.MonoVideoSurfaceRenderer;
 
-public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.Delegate{
+public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.Delegate, HeadTrackingFrameListener {
 
     @BindView(R.id.interlacedView)
     InterlacedSurfaceView mInterlacedView;
@@ -45,6 +47,22 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.video_mono_activity);
+        initialize();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        LeiaSDK instance = LeiaSDK.getInstance();
+        if (instance != null) {
+            instance.enableBacklight(hasFocus);
+        }
+        if (mPlayer != null && !hasFocus) {
+            mPlayer.setPlayWhenReady(false);
+        }
+        super.onWindowFocusChanged(hasFocus);
+    }
+
+    private void initialize() {
         //Init LeiaSDK and start tracking
         try {
             initTracking();
@@ -93,17 +111,17 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
     }
 
     private void configureGo4v(SurfaceTexture surfaceTexture) {
-        if (mMonoVideoSurfaceRenderer == null) {
-            mMonoVideoSurfaceRenderer =
-                    new MonoVideoSurfaceRenderer(
-                            this,
-                            new Surface(surfaceTexture),
-                            null,
-                            monoSurfaceTexture -> {
-                                configureExoplayer(surfaceTexture, monoSurfaceTexture);
-                            },
-                            new RenderConfig(2, 1, 2f, 5, 2400, 1600));
+        if (mMonoVideoSurfaceRenderer != null) {
+            mMonoVideoSurfaceRenderer.release();
+            mMonoVideoSurfaceRenderer = null;
         }
+        mMonoVideoSurfaceRenderer =
+                new MonoVideoSurfaceRenderer(
+                        this,
+                        new Surface(surfaceTexture),
+                        null,
+                        monoSurfaceTexture -> configureExoplayer(surfaceTexture, monoSurfaceTexture),
+                        new RenderConfig(2, 1, 2f, 5, 2400, 1600));
     }
 
     private void configureExoplayer(
@@ -153,19 +171,34 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
     @Override
     protected void onResume() {
         super.onResume();
+        if (mPlayer == null) {
+            initialize();
+        }
         mPlayer.setPlayWhenReady(true);
-        LeiaSDK.getInstance().enableBacklight(true);
+
+        if (LeiaSDK.getInstance() != null) {
+            LeiaSDK.getInstance().onResume();
+        }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LeiaSDK.shutdownSDK();
+    }
+
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (mMonoVideoSurfaceRenderer != null) {
-            mMonoVideoSurfaceRenderer.release();
-        }
         if (mPlayer != null) {
+            mPlayer.stop();
             mPlayer.release();
             mPlayer = null;
+        }
+        if (mMonoVideoSurfaceRenderer != null) {
+            mMonoVideoSurfaceRenderer.release();
+            mMonoVideoSurfaceRenderer = null;
         }
     }
 
@@ -197,6 +230,16 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
 
     @Override
     public void onFaceTrackingStopped(@NonNull LeiaSDK leiaSDK) {
+
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onPointerCaptureChanged(hasCapture);
+    }
+
+    @Override
+    public void onFrame(@NonNull HeadTrackingFrame headTrackingFrame) {
 
     }
 }
