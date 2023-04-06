@@ -151,10 +151,6 @@ public class StereoConvergenceVideoActivity extends Activity implements com.leia
         super.onPause();
         setMode(false);
         mPlayer.setPlayWhenReady(false);
-
-        if (LeiaSDK.getInstance() != null) {
-            LeiaSDK.getInstance().onPause();
-        }
     }
 
     @Override
@@ -165,10 +161,6 @@ public class StereoConvergenceVideoActivity extends Activity implements com.leia
             initialize();
         }
         mPlayer.setPlayWhenReady(true);
-
-        if (LeiaSDK.getInstance() != null) {
-            LeiaSDK.getInstance().onResume();
-        }
     }
 
     @Override

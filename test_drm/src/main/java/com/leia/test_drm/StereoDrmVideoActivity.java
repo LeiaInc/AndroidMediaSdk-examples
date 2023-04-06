@@ -143,10 +143,6 @@ public class StereoDrmVideoActivity extends Activity implements com.leia.sdk.Lei
         super.onPause();
         setMode(false);
         mPlayer.setPlayWhenReady(false);
-
-        if (LeiaSDK.getInstance() != null) {
-            LeiaSDK.getInstance().onPause();
-        }
     }
 
     @Override
@@ -157,10 +153,6 @@ public class StereoDrmVideoActivity extends Activity implements com.leia.sdk.Lei
             initialize();
         }
         mPlayer.setPlayWhenReady(true);
-
-        if (LeiaSDK.getInstance() != null) {
-            LeiaSDK.getInstance().onResume();
-        }
     }
 
     @Override

@@ -162,10 +162,6 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
         super.onPause();
         setMode(false);
         mPlayer.setPlayWhenReady(false);
-
-        if (LeiaSDK.getInstance() != null) {
-            LeiaSDK.getInstance().onPause();
-        }
     }
 
     @Override
@@ -176,10 +172,6 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
             initialize();
         }
         mPlayer.setPlayWhenReady(true);
-
-        if (LeiaSDK.getInstance() != null) {
-            LeiaSDK.getInstance().onResume();
-        }
     }
 
     @Override
