@@ -26,6 +26,8 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
 import com.leia.core.LogLevel;
+import com.leia.headtracking.HeadTrackingFrame;
+import com.leia.headtracking.HeadTrackingFrameListener;
 import com.leia.sdk.LeiaSDK;
 import com.leia.sdk.views.InputViewsAsset;
 import com.leia.sdk.views.InterlacedSurfaceView;
@@ -33,7 +35,7 @@ import com.leia.sdk.views.ScaleType;
 import com.leiainc.androidsdk.video.RenderConfig;
 import com.leiainc.androidsdk.video.mono.MonoVideoSurfaceRenderer;
 
-public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.Delegate{
+public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.Delegate, HeadTrackingFrameListener {
 
     @BindView(R.id.interlacedView)
     InterlacedSurfaceView mInterlacedView;
@@ -45,6 +47,10 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.video_mono_activity);
+        initialize();
+    }
+
+    private void initialize() {
         //Init LeiaSDK and start tracking
         try {
             initTracking();
@@ -93,15 +99,15 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
     }
 
     private void configureGo4v(SurfaceTexture surfaceTexture) {
-        if (mMonoVideoSurfaceRenderer == null) {
-            mMonoVideoSurfaceRenderer =
-                    new MonoVideoSurfaceRenderer(
-                            this,
-                            new Surface(surfaceTexture),
-                            monoSurfaceTexture -> {
-                                configureExoplayer(surfaceTexture, monoSurfaceTexture);
-                            });
+        if (mMonoVideoSurfaceRenderer != null) {
+            mMonoVideoSurfaceRenderer.release();
+            mMonoVideoSurfaceRenderer = null;
         }
+        mMonoVideoSurfaceRenderer =
+                new MonoVideoSurfaceRenderer(
+                        this,
+                        new Surface(surfaceTexture),
+                        monoSurfaceTexture -> configureExoplayer(surfaceTexture, monoSurfaceTexture));
     }
 
     private void configureExoplayer(
@@ -142,28 +148,58 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
                 playing ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play);
     }
 
+    private void setMode(boolean mode3D) {
+        LeiaSDK instance = LeiaSDK.getInstance();
+        if (instance != null) {
+            instance.enableBacklight(mode3D);
+            instance.startFaceTracking(mode3D);
+            mInterlacedView.setSingleViewMode(!mode3D);
+        }
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
+        setMode(false);
         mPlayer.setPlayWhenReady(false);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        setMode(true);
+        if (mPlayer == null) {
+            initialize();
+        }
         mPlayer.setPlayWhenReady(true);
-        LeiaSDK.getInstance().enableBacklight(true);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        setMode(hasFocus);
+        if (mPlayer != null && !hasFocus) {
+            mPlayer.setPlayWhenReady(false);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LeiaSDK.shutdownSDK();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (mMonoVideoSurfaceRenderer != null) {
-            mMonoVideoSurfaceRenderer.release();
-        }
         if (mPlayer != null) {
+            mPlayer.stop();
             mPlayer.release();
             mPlayer = null;
+        }
+        if (mMonoVideoSurfaceRenderer != null) {
+            mMonoVideoSurfaceRenderer.release();
+            mMonoVideoSurfaceRenderer = null;
         }
     }
 
@@ -195,6 +231,16 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
 
     @Override
     public void onFaceTrackingStopped(@NonNull LeiaSDK leiaSDK) {
+
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onPointerCaptureChanged(hasCapture);
+    }
+
+    @Override
+    public void onFrame(@NonNull HeadTrackingFrame headTrackingFrame) {
 
     }
 }

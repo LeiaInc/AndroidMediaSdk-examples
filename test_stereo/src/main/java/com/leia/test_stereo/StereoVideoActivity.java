@@ -7,7 +7,6 @@ import android.graphics.SurfaceTexture;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Surface;
-import android.view.View;
 import android.widget.ImageButton;
 import androidx.annotation.NonNull;
 
@@ -40,6 +39,7 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.video_stereo_activity);
+
         //Init LeiaSDK and start tracking
         try {
             initTracking();
@@ -50,6 +50,13 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
         //Bind view
         ButterKnife.bind(this);
 
+        initialize();
+    }
+
+    private void initialize() {
+        if (mPlayer != null) {
+            mPlayer.release();
+        }
         // Init Exoplayer
         mPlayer = new SimpleExoPlayer.Builder(this).build();
 
@@ -65,24 +72,24 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
                 });
         mInterlacedView.setViewAsset(newViewsAsset);
         mInterlacedView.setScaleType(ScaleType.FIT_CENTER);
+
         //Turn on 3d backlight
         LeiaSDK.getInstance().enableBacklight(true);
-
     }
 
     private void configureGo4v(SurfaceTexture surfaceTexture) {
-        if (mStereoVideoSurfaceRenderer == null) {
-            mStereoVideoSurfaceRenderer =
-                    new StereoVideoSurfaceRenderer(
-                            this,
-                            new Surface(surfaceTexture),
-                            LANDSCAPE,
-                            null,
-                            renderSurfaceTexture -> {
-                                configureExoplayer(surfaceTexture, renderSurfaceTexture);
-                            },
-                            true);
+        if (mStereoVideoSurfaceRenderer != null) {
+            mStereoVideoSurfaceRenderer.release();
+            mStereoVideoSurfaceRenderer = null;
         }
+        mStereoVideoSurfaceRenderer =
+                new StereoVideoSurfaceRenderer(
+                        this,
+                        new Surface(surfaceTexture),
+                        LANDSCAPE,
+                        null,
+                        renderSurfaceTexture -> configureExoplayer(surfaceTexture, renderSurfaceTexture),
+                        true);
     }
 
     private void configureExoplayer( SurfaceTexture DepthViewSurface, SurfaceTexture surfaceTexture) {
@@ -109,7 +116,6 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
         MediaSource videoSource =
                 new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
         LoopingMediaSource loopingSource = new LoopingMediaSource(videoSource);
-
         mPlayer.prepare(loopingSource);
     }
 
@@ -122,31 +128,60 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
                 playing ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play);
     }
 
+    private void setMode(boolean mode3D) {
+        LeiaSDK instance = LeiaSDK.getInstance();
+        if (instance != null) {
+            instance.enableBacklight(mode3D);
+            instance.startFaceTracking(mode3D);
+            mInterlacedView.setSingleViewMode(!mode3D);
+        }
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
+        setMode(false);
         mPlayer.setPlayWhenReady(false);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        setMode(true);
+        if (mPlayer == null) {
+            initialize();
+        }
         mPlayer.setPlayWhenReady(true);
-        LeiaSDK.getInstance().onResume();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        setMode(hasFocus);
+        if (mPlayer != null && !hasFocus) {
+            mPlayer.setPlayWhenReady(false);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LeiaSDK.shutdownSDK();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (mStereoVideoSurfaceRenderer != null) {
-            mStereoVideoSurfaceRenderer.release();
-        }
         if (mPlayer != null) {
+            mPlayer.stop();
             mPlayer.release();
             mPlayer = null;
         }
+        if (mStereoVideoSurfaceRenderer != null) {
+            mStereoVideoSurfaceRenderer.release();
+            mStereoVideoSurfaceRenderer = null;
+        }
     }
-
 
     private void initTracking() throws Exception {
         com.leia.sdk.LeiaSDK.InitArgs initArgs = new com.leia.sdk.LeiaSDK.InitArgs();
