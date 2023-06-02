@@ -29,10 +29,12 @@ android {
 dependencies {
 
     implementation(name: 'snpe-1.64.0', ext:'aar')
-    implementation(name: 'sdk-faceTrackingService-0.6.162', ext:'aar')
-    implementation(name: 'androidmediasdk-0.1.19', ext:'aar')
+    implementation(name: 'sdk-faceTrackingService-0.6.210', ext:'aar')
+    implementation(name: 'androidmediasdk-0.4.3', ext:'aar')
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.core:core-ktx:1.6.0'
 
     implementation 'com.google.android.exoplayer:exoplayer:2.11.4'
 

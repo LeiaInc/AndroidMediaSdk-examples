@@ -73,6 +73,10 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
                     configureGo4v(surfaceTexture);
                 });
         mInterlacedView.setViewAsset(newViewsAsset);
+        mInterlacedView.setSingleViewModeListener(
+                (mode) -> {
+                    mMonoVideoSurfaceRenderer.setSingleViewMode(mode);
+                });
         mInterlacedView.setScaleType(ScaleType.FIT_CENTER);
         // Setup 3d effect slider
         TextView gainTextView = findViewById(R.id.gain_textview);
