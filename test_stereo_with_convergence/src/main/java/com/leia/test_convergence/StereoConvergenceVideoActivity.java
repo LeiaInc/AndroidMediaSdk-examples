@@ -92,12 +92,7 @@ public class StereoConvergenceVideoActivity extends Activity implements com.leia
                         null,
                         renderSurfaceTexture -> configureExoplayer(surfaceTexture, renderSurfaceTexture),
                         true);
-        mStereoVideoSurfaceRenderer.setGainConvergenceAnalysisCallback((convergence, unused) -> runOnUiThread(() -> {
-            final float limit = 0.3f;
-            if (mStereoVideoSurfaceRenderer != null) {
-                mStereoVideoSurfaceRenderer.setConvergence(-Math.min(limit, Math.max(-limit, convergence)));
-            }
-        }));
+        mStereoVideoSurfaceRenderer.setAutoConvergence(true);
     }
 
     private void configureExoplayer( SurfaceTexture DepthViewSurface, SurfaceTexture surfaceTexture) {
