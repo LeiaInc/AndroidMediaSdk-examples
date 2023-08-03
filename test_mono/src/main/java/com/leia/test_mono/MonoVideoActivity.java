@@ -32,8 +32,8 @@ import com.leia.sdk.LeiaSDK;
 import com.leia.sdk.views.InputViewsAsset;
 import com.leia.sdk.views.InterlacedSurfaceView;
 import com.leia.sdk.views.ScaleType;
-import com.leiainc.androidsdk.video.RenderConfig;
-import com.leiainc.androidsdk.video.mono.MonoVideoSurfaceRenderer;
+import com.leiainc.leiamediasdk.LeiaMediaSDK;
+import com.leiainc.leiamediasdk.interfaces.MonoVideoSurfaceRenderer;
 
 public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.Delegate, HeadTrackingFrameListener {
 
@@ -64,12 +64,11 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
         mPlayer = new SimpleExoPlayer.Builder(this).build();
         // Setup 3d view to render video
         InputViewsAsset newViewsAsset = new InputViewsAsset();
-        RenderConfig cfg = RenderConfig.getDefaultRenderConfig();
         newViewsAsset.CreateEmptySurfaceForVideo(
-                cfg.screenWidth,
-                cfg.screenHeight,
+                1920,
+                1080,
                 surfaceTexture -> {
-                    surfaceTexture.setDefaultBufferSize(cfg.screenWidth, cfg.screenHeight);
+                    surfaceTexture.setDefaultBufferSize(1920, 1080);
                     configureGo4v(surfaceTexture);
                 });
         mInterlacedView.setViewAsset(newViewsAsset);
@@ -107,8 +106,7 @@ public class MonoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.
             mMonoVideoSurfaceRenderer.release();
             mMonoVideoSurfaceRenderer = null;
         }
-        mMonoVideoSurfaceRenderer =
-                new MonoVideoSurfaceRenderer(
+        mMonoVideoSurfaceRenderer = LeiaMediaSDK.getInstance(this).createMonoVideoSurfaceRenderer(
                         this,
                         new Surface(surfaceTexture),
                         monoSurfaceTexture -> configureExoplayer(surfaceTexture, monoSurfaceTexture));

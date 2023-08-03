@@ -15,7 +15,7 @@ class Image2x1Activity : Activity() {
         setContentView(R.layout.activity_main)
         initTracking()
 
-        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.car_2x1)
+        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.variant1_2x1)
         val asset = InputViewsAsset()
         val interlacedSurfaceView = findViewById<InterlacedSurfaceView>(R.id.interlacedSurfaceView)
         asset.CreateSurfaceFromLoadedBitmap(bitmap)

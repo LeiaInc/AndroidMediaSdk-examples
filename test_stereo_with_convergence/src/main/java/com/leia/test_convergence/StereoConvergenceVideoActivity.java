@@ -1,12 +1,9 @@
 package com.leia.test_convergence;
 
-import static com.leiainc.androidsdk.video.stereo.TextureShape.LANDSCAPE;
-
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.Surface;
 import android.widget.ImageButton;
 import androidx.annotation.NonNull;
@@ -27,9 +24,9 @@ import com.leia.sdk.views.InputViewsAsset;
 import com.leia.sdk.views.InterlacedSurfaceView;
 import com.leia.sdk.views.ScaleType;
 import com.leia.test_stereo.R;
-import com.leiainc.androidsdk.video.RenderConfig;
-import com.leiainc.androidsdk.video.stereo.StereoVideoSurfaceRenderer;
 import com.leia.sdk.LeiaSDK;
+import com.leiainc.leiamediasdk.LeiaMediaSDK;
+import com.leiainc.leiamediasdk.interfaces.StereoVideoSurfaceRenderer;
 
 public class StereoConvergenceVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.Delegate{
     @BindView(R.id.interlacedView)
@@ -64,12 +61,11 @@ public class StereoConvergenceVideoActivity extends Activity implements com.leia
 
         //Init 3d view
         InputViewsAsset newViewsAsset = new InputViewsAsset();
-        RenderConfig cfg = RenderConfig.getDefaultRenderConfig();
         newViewsAsset.CreateEmptySurfaceForVideo(
-                cfg.screenWidth,
-                cfg.screenHeight,
+                1656,
+                1036,
                 surfaceTexture -> {
-                    surfaceTexture.setDefaultBufferSize(cfg.screenWidth, cfg.screenHeight);
+                    surfaceTexture.setDefaultBufferSize(1656, 1036);
                     configureGo4v(surfaceTexture);
                 });
         mInterlacedView.setViewAsset(newViewsAsset);
@@ -84,14 +80,10 @@ public class StereoConvergenceVideoActivity extends Activity implements com.leia
             mStereoVideoSurfaceRenderer.release();
             mStereoVideoSurfaceRenderer = null;
         }
-        mStereoVideoSurfaceRenderer =
-                new StereoVideoSurfaceRenderer(
+        mStereoVideoSurfaceRenderer = LeiaMediaSDK.getInstance(this).createStereoVideoSurfaceRenderer(
                         this,
                         new Surface(surfaceTexture),
-                        LANDSCAPE,
-                        null,
-                        renderSurfaceTexture -> configureExoplayer(surfaceTexture, renderSurfaceTexture),
-                        true);
+                        renderSurfaceTexture -> configureExoplayer(surfaceTexture, renderSurfaceTexture));
         mStereoVideoSurfaceRenderer.setAutoConvergence(true);
     }
 
