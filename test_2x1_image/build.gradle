@@ -30,9 +30,9 @@ android {
 }
 
 dependencies {
-    implementation(name: 'snpe-1.64.0', ext:'aar')
+
     implementation(name: 'sdk-faceTrackingService-0.7.9', ext:'aar')
-    implementation(name: 'leiamediasdk-0.5.7', ext:'aar')
+    implementation(name: 'leiamediasdk-0.5.12', ext:'aar')
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
 
