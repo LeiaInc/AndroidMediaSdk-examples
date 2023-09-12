@@ -13,6 +13,7 @@ For Android app to be able to use AndroidMediaSDK it needs certian libraries and
 ### Libraries:
  * androidmediasdk >= 0.5.15
  * sdk-faceTrackingService >= 0.7.69
+   
  [if using MultiviewImage & LIF format]
  * androidsdk-photoformat >= 5.3.9
  * com.google.code.gson:gson:2.8.6
