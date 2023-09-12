@@ -27,7 +27,7 @@ import com.leia.sdk.LeiaSDK;
 import com.leiainc.leiamediasdk.LeiaMediaSDK;
 import com.leiainc.leiamediasdk.interfaces.StereoVideoSurfaceRenderer;
 
-public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSDK.Delegate{
+public class StereoVideoActivity extends Activity{
     @BindView(R.id.interlacedView)
     InterlacedSurfaceView mInterlacedView;
     private SimpleExoPlayer mPlayer;
@@ -59,16 +59,12 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
         mPlayer = new SimpleExoPlayer.Builder(this).build();
 
         //Init 3d view
-        InputViewsAsset newViewsAsset = new InputViewsAsset();
-        newViewsAsset.CreateEmptySurfaceForVideo(
-                1656,
-                1036,
+        InputViewsAsset newViewsAsset = InputViewsAsset.createEmptySurfaceForVideo(
                 surfaceTexture -> {
                     surfaceTexture.setDefaultBufferSize(1656, 1036);
                     configureGo4v(surfaceTexture);
                 });
         mInterlacedView.setViewAsset(newViewsAsset);
-        mInterlacedView.setScaleType(ScaleType.FIT_CENTER);
 
         //Turn on 3d backlight
         LeiaSDK.getInstance().enableBacklight(true);
@@ -182,28 +178,29 @@ public class StereoVideoActivity extends Activity implements com.leia.sdk.LeiaSD
         initArgs.platform.context = this.getApplicationContext();
         initArgs.faceTrackingServerLogLevel = LogLevel.Trace;
         initArgs.enableFaceTracking = true;
+        initArgs.delegate =
+                new LeiaSDK.Delegate() {
+                    @Override
+                    public void didInitialize(@NonNull LeiaSDK leiaSDK) {
+                        leiaSDK.enableFaceTracking(true);
+                        leiaSDK.startFaceTracking(false);
+                    }
+
+                    @Override
+                    public void onFaceTrackingFatalError(@NonNull LeiaSDK leiaSDK) {
+                        leiaSDK.enableFaceTracking(false);
+                    }
+
+                    @Override
+                    public void onFaceTrackingStarted(@NonNull LeiaSDK leiaSDK) {
+                        // unused
+                    }
+
+                    @Override
+                    public void onFaceTrackingStopped(@NonNull LeiaSDK leiaSDK) {
+                        // unused
+                    }
+                };
         com.leia.sdk.LeiaSDK.createSDK(initArgs);
-    }
-
-    @Override
-    public void didInitialize(@NonNull LeiaSDK leiaSDK) {
-        assert (leiaSDK.isInitialized());
-        com.leia.sdk.LeiaSDK leiaSDKInstance = com.leia.sdk.LeiaSDK.getInstance();
-        if (leiaSDKInstance != null) leiaSDKInstance.enableBacklight(true);
-    }
-
-    @Override
-    public void onFaceTrackingFatalError(@NonNull LeiaSDK leiaSDK) {
-
-    }
-
-    @Override
-    public void onFaceTrackingStarted(@NonNull LeiaSDK leiaSDK) {
-
-    }
-
-    @Override
-    public void onFaceTrackingStopped(@NonNull LeiaSDK leiaSDK) {
-
     }
 }
