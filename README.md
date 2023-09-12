@@ -11,9 +11,11 @@ This examples showing basic functions AndroidMediaSDK:
 For Android app to be able to use AndroidMediaSDK it needs certian libraries and settings
 
 ### Libraries:
- * androidmediasdk-0.1.xx
- * snpe-1.64.0
- * sdk-faceTrackingService-0.6.xxx
+ * androidmediasdk >= 0.5.15
+ * sdk-faceTrackingService >= 0.7.69
+ [if using MultiviewImage & LIF format]
+ * androidsdk-photoformat >= 5.3.9
+ * com.google.code.gson:gson:2.8.6
  
 ### Settings:
 #### AndroidManifest
@@ -27,14 +29,3 @@ For Android app to be able to use AndroidMediaSDK it needs certian libraries and
 
 ```targetSdkVersion <= 30```
 
-2.
-
-```android {
-    packagingOptions {
-        pickFirst 'lib/x86/libc++_shared.so'
-        pickFirst 'lib/x86_64/libc++_shared.so'
-        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
-        pickFirst 'lib/arm64-v8a/libc++_shared.so'
-        doNotStrip "*/armeabi-v7a/libsnpe_*.so"
-        doNotStrip "*/arm64-v8a/libsnpe_*.so"
-    }```
