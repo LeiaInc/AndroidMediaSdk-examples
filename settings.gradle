@@ -5,3 +5,4 @@ include ':test_stereo_with_convergence'
 include ':test_drm'
 include ':test_2x1_image'
 rootProject.name = "AndroidMediaSdkExamples"
+include ':test_video_surface_reuse'
