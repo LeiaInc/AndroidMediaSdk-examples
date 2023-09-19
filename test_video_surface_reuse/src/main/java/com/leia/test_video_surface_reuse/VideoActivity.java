@@ -119,6 +119,7 @@ public class VideoActivity extends Activity{
                 new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
         LoopingMediaSource loopingSource = new LoopingMediaSource(videoSource);
         mPlayer.prepare(loopingSource);
+        mPlayer.setPlayWhenReady(true);
     }
 
     @OnClick(R.id.playButton)
