@@ -1,0 +1,48 @@
+apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
+
+android {
+    compileSdk 30
+
+    defaultConfig {
+        applicationId = 'com.leia.test_mono_jpg_2d3d_conversion'
+        minSdk 30
+        targetSdk 30
+        versionCode = 1
+        versionName = '1.0'
+
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    packagingOptions {
+        jniLibs {
+            keepDebugSymbols += ['**/*/*.so']
+            useLegacyPackaging = true
+        }
+    }
+}
+
+dependencies {
+
+    implementation(name: 'sdk-faceTrackingService-0.7.69', ext:'aar')
+    implementation(name: 'leiamediasdk-0.5.15', ext:'aar')
+    implementation(name: 'androidsdk-core-1.9.6', ext:'aar')
+    implementation(name: 'androidsdk-photoformat-5.3.9', ext:'aar')
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.core:core-ktx:1.6.0'
+
+    implementation 'com.google.android.exoplayer:exoplayer:2.11.4'
+
+
+    implementation 'com.jakewharton:butterknife:10.2.3'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
+
+}

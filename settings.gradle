@@ -1,6 +1,7 @@
 include ':test_stereo'
 include ':test_mono'
-include ':test_mono_image'
+include ':test_mono_lif_image'
+include ':test_mono_jpg_2d3d_conversion'
 include ':test_stereo_with_convergence'
 include ':test_drm'
 include ':test_2x1_image'
