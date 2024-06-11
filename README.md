@@ -11,7 +11,7 @@ This examples showing basic functions AndroidMediaSDK:
 For Android app to be able to use AndroidMediaSDK it needs certian libraries and settings
 
 ### Libraries:
- * androidmediasdk >= 0.5.15
+ * androidmediasdk >= 0.5.45
  * sdk-faceTrackingService >= 0.7.69
    
  [if using MultiviewImage & LIF format]
