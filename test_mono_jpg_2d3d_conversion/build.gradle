@@ -30,7 +30,7 @@ android {
 dependencies {
 
     implementation(name: 'sdk-faceTrackingService-0.7.69', ext:'aar')
-    implementation(name: 'leiamediasdk-0.5.15', ext:'aar')
+    implementation(name: 'leiamediasdk-0.5.45', ext:'aar')
     implementation(name: 'androidsdk-core-1.9.6', ext:'aar')
     implementation(name: 'androidsdk-photoformat-5.3.9', ext:'aar')
     implementation 'com.google.code.gson:gson:2.8.6'
